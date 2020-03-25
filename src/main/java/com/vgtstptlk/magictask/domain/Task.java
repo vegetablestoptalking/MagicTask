@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Map;
 
 @Entity
 public class Task {
@@ -15,8 +16,9 @@ public class Task {
     @GeneratedValue
     private Long id;
 
+    public String nameTask;
     public boolean flag;
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     public Date dateCreation;
     @Temporal(TemporalType.TIMESTAMP)
     public Date dateCompletion;
@@ -25,8 +27,11 @@ public class Task {
     public Task() {
     }
 
-    public Task(String description) {
+    public Task(User user, String nameTask, String description) {
+        this.user = user;
         this.description = description;
+        this.nameTask = nameTask;
+        this.dateCreation = new Date();
     }
 
     public boolean isFlag() {
@@ -43,5 +48,9 @@ public class Task {
 
     public String getDescription() {
         return description;
+    }
+
+    public Long getId(){
+        return id;
     }
 }
