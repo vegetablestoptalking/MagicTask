@@ -18,6 +18,7 @@ public class Task {
 
     public String nameTask;
     public boolean flag;
+    @Column(updatable = false)
     @Temporal(TemporalType.DATE)
     public Date dateCreation;
     @Temporal(TemporalType.TIMESTAMP)

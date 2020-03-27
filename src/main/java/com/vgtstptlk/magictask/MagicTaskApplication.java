@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Arrays;
 
@@ -22,9 +23,9 @@ public class MagicTaskApplication {
     CommandLineRunner init(UserRepository userRepository,
                            TaskRepository taskRepository) {
         User user = userRepository.save(new User("mag",
-                "password", "Magerram", "Zeynalov"));
+                new BCryptPasswordEncoder().encode("password"), "Magerram", "Zeynalov"));
         return (evt) -> Arrays.asList(
-                "jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong".split(","))
+                "jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong,a,a,a,a,a,a,a,a,,a,a,a,a".split(","))
                 .forEach(
                         a -> {
 
