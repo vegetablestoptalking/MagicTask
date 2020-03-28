@@ -36,7 +36,7 @@ public class MagicTaskController {
      * @param input Task
      * @return ResponseEntity
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(name = "add", method = RequestMethod.POST)
     ResponseEntity<?> add(Principal principal, @RequestBody Task input){
         this.validateUser(principal.getName());
         this.validateTaskByDate(principal.getName(), input.nameTask);
@@ -56,7 +56,7 @@ public class MagicTaskController {
      * Method returns all your tasks
      *
      * */
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(name = "readAllTasks", method = RequestMethod.GET)
     Collection<Task> readTasks(Principal principal){
         this.validateUser(principal.getName());
         return this.taskRepository.findByUserUsername(principal.getName());

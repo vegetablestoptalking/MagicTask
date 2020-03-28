@@ -17,11 +17,59 @@
 
 ### API
 
-#### POST /api/tasks 
+#### /api/tasks/add
 
-#### GET /api/tasks
+Метод добавляет задачу в список задач авторизованного пользователя.
 
-#### GET "filter" /api/tasks
+```json
+Method: POST
+```
+
+**Example**
+
+```json
+{
+    
+}
+```
+
+------
+
+
+
+#### /api/tasks/readAllTasks
+
+```
+Method: GET
+```
+
+**Example**
+
+```json
+{
+    
+}
+```
+
+------
+
+
+
+#### /api/tasks/filter
+
+```
+Method: POST
+```
+
+Example
+
+```json
+{
+    
+}
+```
+
+
 
 ### База данных
 
