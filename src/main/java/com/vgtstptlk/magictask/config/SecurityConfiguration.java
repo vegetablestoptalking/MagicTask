@@ -25,7 +25,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/**").authenticated()
+                .antMatchers("/api/login/**").permitAll()
+                .antMatchers("/api/tasks/**").authenticated()
                 .and()
                 .httpBasic()
                 .and().csrf().disable();

@@ -25,7 +25,7 @@
 Method: POST
 ```
 
-**Example**
+**Request Example**
 
 ```json
 {
@@ -37,18 +37,39 @@ Method: POST
 
 
 
-#### /api/tasks/readAllTasks
+#### /api/tasks/
 
 ```
 Method: GET
 ```
 
-**Example**
+**Request Example**
+
+```http
+localhost:8080/api/tasks/
+```
+
+**Response Example**
 
 ```json
-{
-    
-}
+[
+    {
+        "id": 4,
+        "nameTask": "Lookdsyer",
+        "flag": false,
+        "dateCreation": "2020-03-28",
+        "dateCompletion": null,
+        "description": "A description"
+    },
+    {
+        "id": 5,
+        "nameTask": "Saydsyer",
+        "flag": false,
+        "dateCreation": "2020-03-28",
+        "dateCompletion": null,
+        "description": "A description"
+    }
+]
 ```
 
 ------
@@ -61,7 +82,7 @@ Method: GET
 Method: POST
 ```
 
-Example
+Request Example
 
 ```json
 {

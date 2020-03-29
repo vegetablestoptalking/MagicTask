@@ -54,4 +54,24 @@ public class Task {
     public Long getId(){
         return id;
     }
+
+    public void setNameTask(String nameTask) {
+        this.nameTask = nameTask;
+    }
+
+    public void setFlag(boolean flag) {
+        this.flag = flag;
+    }
+
+    public void setDateCreation(Date dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public void setDateCompletion(Date dateCompletion) {
+        this.dateCompletion = dateCompletion;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

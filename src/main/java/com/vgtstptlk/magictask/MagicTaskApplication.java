@@ -23,9 +23,9 @@ public class MagicTaskApplication {
     CommandLineRunner init(UserRepository userRepository,
                            TaskRepository taskRepository) {
         User user = userRepository.save(new User("mag",
-                new BCryptPasswordEncoder().encode("password"), "Magerram", "Zeynalov"));
+                "password", "Magerram", "Zeynalov"));
         return (evt) -> Arrays.asList(
-                "jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong,a,a,a,a,a,a,a,a,,a,a,a,a".split(","))
+                "jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong".split(","))
                 .forEach(
                         a -> {
 

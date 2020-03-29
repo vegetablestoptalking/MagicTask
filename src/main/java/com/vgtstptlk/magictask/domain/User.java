@@ -1,8 +1,10 @@
 package com.vgtstptlk.magictask.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,16 +23,34 @@ public class User {
     public String secondName;
 
     @JsonIgnore
+    @NotNull
     public String username;
     @JsonIgnore
+    @NotNull
     public String password;
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = (new BCryptPasswordEncoder()).encode(password);
+    }
 
     public User() {
     }
 
     public User(String username, String password, String firstName, String secondName){
         this.username = username;
-        this.password = password;
+        this.password = (new BCryptPasswordEncoder()).encode(password);
         this.firstName = firstName;
         this.secondName = secondName;
     }

@@ -17,7 +17,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * Task controller
@@ -36,8 +35,8 @@ public class MagicTaskController {
      * @param input Task
      * @return ResponseEntity
      */
-    @RequestMapping(name = "add", method = RequestMethod.POST)
-    ResponseEntity<?> add(Principal principal, @RequestBody Task input){
+    @RequestMapping(method = RequestMethod.POST)
+    ResponseEntity<?> add(Principal principal, @ModelAttribute Task input){
         this.validateUser(principal.getName());
         this.validateTaskByDate(principal.getName(), input.nameTask);
         return this.userRepository
@@ -56,24 +55,70 @@ public class MagicTaskController {
      * Method returns all your tasks
      *
      * */
-    @RequestMapping(name = "readAllTasks", method = RequestMethod.GET)
+    @GetMapping
     Collection<Task> readTasks(Principal principal){
         this.validateUser(principal.getName());
         return this.taskRepository.findByUserUsername(principal.getName());
     }
 
     /**
+     * Method returns collections with completed tasks
+     * @param principal security
+     * @return collection with completed tasks
+     */
+    @GetMapping("filter/completed")
+    Collection<Task> readCompletedTasks(Principal principal){
+        this.validateUser(principal.getName());
+        return this.taskRepository.findByUserUsernameAndFlag(principal.getName(), true);
+    }
+
+    /**
+     * Method returns collection with undone tasks
+     * @param principal security
+     * @return collection with undone tasks
+     */
+    @GetMapping("filter/uncompleted")
+    Collection<Task> readUncompletedTasks(Principal principal){
+        this.validateUser(principal.getName());
+        return this.taskRepository.findByUserUsernameAndFlag(principal.getName(), false);
+    }
+
+    /**
      * Searching task by name and date (default: today's date)
-     * @param nameTask task name
+     * @param idTask task id
      * @param textDate date the task was created. Default today's date
      * @return Task
      */
-    @RequestMapping(name = "filter", method = RequestMethod.GET)
-    Task readTaskByName(Principal principal, @RequestBody String nameTask, @RequestBody String textDate){
+    @RequestMapping(value = "/{idTask}",method = RequestMethod.GET)
+    Task readTaskByName(Principal principal, @PathVariable Long idTask, @RequestBody String textDate){
         Date date = (!textDate.isEmpty()) ? new Date(textDate) : new Date();
-        return this.taskRepository.findByNameTaskAndAndDateCreation(nameTask, date).orElseThrow(
-                ()-> new TaskNotFoundException(nameTask)
+        return this.taskRepository.findByIdAndAndDateCreation(idTask, date).orElseThrow(
+                ()-> new TaskNotFoundException(idTask)
         );
+    }
+
+    @PutMapping(value = "{idTask}")
+    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestBody Task task){
+        this.validateTaskByUserAndName(principal.getName(), idTask);
+        if (task.isFlag()){
+            task.dateCompletion = new Date();
+        }
+        this.taskRepository.save(task);
+        return new ResponseEntity<>("Task was updated", HttpStatus.CREATED);
+    }
+
+    /**
+     *
+     * @param principal security
+     * @param idTask id task
+     * @return response entity with OK status
+     */
+    @DeleteMapping(value = "{idTask}")
+    ResponseEntity<?> deleteTask(Principal principal, @PathVariable Long idTask){
+        this.validateUser(principal.getName());
+        this.validateTaskByUserAndName(principal.getName(), idTask);
+        taskRepository.deleteById(idTask);
+        return new ResponseEntity<>("Task was deleted", HttpStatus.OK);
     }
 
     private void validateUser(String userId) {
@@ -85,6 +130,12 @@ public class MagicTaskController {
         if (taskRepository.findByUserUsernameAndNameTaskAndDateCreation(userId, nameTask, new Date()).size() > 0){
             throw new TaskExistsException();
         }
+    }
+
+    private void validateTaskByUserAndName(String userId, Long id){
+        taskRepository.findByUserUsernameAndId(userId, id).orElseThrow(
+                () -> new TaskNotFoundException(id)
+        );
     }
 
     @Autowired
