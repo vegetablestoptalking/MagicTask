@@ -14,5 +14,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIdAndAndDateCreation(Long id, Date dateCreation);
     Optional<Task> findByUserUsernameAndId(String username, Long id);
     Collection<Task> findByUserUsernameAndFlag(String username, Boolean flag);
+    Collection<Task> findByDateCreationBetween(Date dateFrom, Date DateTo);
     void deleteById(Long Id);
 }

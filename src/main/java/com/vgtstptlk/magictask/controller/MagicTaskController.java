@@ -35,7 +35,7 @@ public class MagicTaskController {
      * @param input Task
      * @return ResponseEntity
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     ResponseEntity<?> add(Principal principal, @ModelAttribute Task input){
         this.validateUser(principal.getName());
         this.validateTaskByDate(principal.getName(), input.nameTask);
@@ -89,12 +89,18 @@ public class MagicTaskController {
      * @param textDate date the task was created. Default today's date
      * @return Task
      */
-    @RequestMapping(value = "/{idTask}",method = RequestMethod.GET)
+    @GetMapping(value = "/{idTask}")
     Task readTaskByName(Principal principal, @PathVariable Long idTask, @RequestBody String textDate){
         Date date = (!textDate.isEmpty()) ? new Date(textDate) : new Date();
         return this.taskRepository.findByIdAndAndDateCreation(idTask, date).orElseThrow(
                 ()-> new TaskNotFoundException(idTask)
         );
+    }
+
+    @GetMapping("filter/byperiod")
+    Collection<Task> readTasksByPeriod(Principal principal, @RequestBody Date dateFrom, @RequestBody Date dateTo){
+        this.validateUser(principal.getName());
+        return taskRepository.findByDateCreationBetween(dateFrom, dateTo);
     }
 
     @PutMapping(value = "{idTask}")
