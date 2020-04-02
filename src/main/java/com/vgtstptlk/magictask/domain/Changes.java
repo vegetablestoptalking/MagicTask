@@ -1,19 +1,22 @@
 package com.vgtstptlk.magictask.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-public class History {
+public class Changes {
     @Id
     @GeneratedValue
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     private Task task;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date date;
+    @Temporal(TemporalType.DATE)
+    private Date dateUpdate;
 
     private String description;
 
@@ -26,20 +29,13 @@ public class History {
         this.id = id;
     }
 
-    public Task getTask() {
-        return task;
+
+    public Date getDateUpdate() {
+        return dateUpdate;
     }
 
-    public void setTask(Task task) {
-        this.task = task;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
+    public void setDateUpdate(Date date) {
+        this.dateUpdate = date;
     }
 
     public String getDescription() {
@@ -50,11 +46,21 @@ public class History {
         this.description = description;
     }
 
-    public History() {
+    public Task getTask() {
+        return task;
     }
 
-    public History(String description) {
+    public void setTask(Task task) {
+        this.task = task;
+    }
+
+    public Changes() {
+    }
+
+    public Changes(Task task, String description) {
         this.description = description;
+        this.dateUpdate = new Date();
+        this.task = task;
     }
 }
 

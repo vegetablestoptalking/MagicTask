@@ -15,8 +15,7 @@ public class User {
     private Long id;
 
     @OneToMany(mappedBy = "user")
-    private Set<Task> tasks = new HashSet<>();
-
+    private Set<Task> task = new HashSet<>();
 
 
     public String firstName;
@@ -25,6 +24,7 @@ public class User {
     @JsonIgnore
     @NotNull
     public String username;
+
     @JsonIgnore
     @NotNull
     public String password;
