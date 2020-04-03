@@ -10,6 +10,7 @@ import com.vgtstptlk.magictask.repos.ChangesRepository;
 import com.vgtstptlk.magictask.repos.TaskRepository;
 import com.vgtstptlk.magictask.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +73,17 @@ public class MagicTaskController {
     @GetMapping("filter/completed")
     Collection<Task> readCompletedTasks(Principal principal){
         this.validateUser(principal.getName());
-        return null;
+        Collection<Task> tasks = this.taskRepository.findByUserUsername(principal.getName());
+        Iterator<Task> taskIterator = tasks.iterator();
+        Collection<Task> completedTask = new ArrayList<>();
+        while (taskIterator.hasNext()){
+            Task tempTask = taskIterator.next();
+            List<Changes> tempChanges = tempTask.getChanges();
+            if (tempChanges.get(tempChanges.size()-1).getDescription().equals("Completed")){
+                completedTask.add(tempTask);
+            }
+        }
+        return completedTask;
     }
 
     /**
@@ -83,7 +94,17 @@ public class MagicTaskController {
     @GetMapping("filter/uncompleted")
     Collection<Task> readUncompletedTasks(Principal principal){
         this.validateUser(principal.getName());
-        return null;
+        Collection<Task> tasks = this.taskRepository.findByUserUsername(principal.getName());
+        Iterator<Task> taskIterator = tasks.iterator();
+        Collection<Task> uncompletedTask = new ArrayList<>();
+        while (taskIterator.hasNext()){
+            Task tempTask = taskIterator.next();
+            List<Changes> tempChanges = tempTask.getChanges();
+            if (!tempChanges.get(tempChanges.size()-1).getDescription().equals("Completed")){
+                uncompletedTask.add(tempTask);
+            }
+        }
+        return uncompletedTask;
     }
 
     /**
@@ -94,13 +115,13 @@ public class MagicTaskController {
     @GetMapping(value = "{idTask}")
     Task readTaskByName(Principal principal, @PathVariable Long idTask){
 
-        Collection<Changes> changes =  changesRepository
+        Optional<Changes> changes =  changesRepository
                 .findByTaskUserUsernameAndTaskIdAndDateUpdate(principal.getName(), idTask, new Date());
-        if (!changes.iterator().hasNext()) {
-            throw new TaskNotFoundException(idTask);
-        }
+        changes.orElseThrow(
+                () -> new TaskNotFoundException(idTask)
+        );
 
-        return changes.iterator().next().getTask();
+        return changes.get().getTask();
     }
 
     @GetMapping("filter/byperiod")
@@ -116,11 +137,42 @@ public class MagicTaskController {
     }
 
     @PutMapping(value = "{idTask}")
-    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestBody Task task){
+    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam String nameTask,
+                                 @RequestParam String description,
+                                 @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
         this.validateTaskByUserAndName(principal.getName(), idTask);
-        //add date check
+        this.validateByUpdate(principal.getName(), idTask, nameTask, date);
+        if (date == null){
+            date = new Date();
+        }
+        Optional<Changes> changes = this.changesRepository
+                .findByTaskUserUsernameAndTaskIdAndDateUpdate(principal.getName(), idTask, date);
+        changes.orElseThrow(
+                () -> new TaskNotFoundException(idTask)
+        );
+
+        Changes tempChanges = changes.get();
+        Task task = tempChanges.getTask();
+        task.setNameTask(nameTask);
+        task.setDescription(description);
+        List<Changes> listChanges = tempChanges.getTask().getChanges();
+        listChanges.add(new Changes(task, "Updated"));
+        task.setChanges(listChanges);
         this.taskRepository.save(task);
-        return new ResponseEntity<>("Task was updated", HttpStatus.CREATED);
+        return new ResponseEntity<>("Task was updated", HttpStatus.OK);
+    }
+
+    @PutMapping("completed/{idTask}")
+    ResponseEntity<?> completeTask(Principal principal, @PathVariable Long idTask){
+        this.validateUser(principal.getName());
+        Task task = this.taskRepository.findByUserUsernameAndId(principal.getName(), idTask).orElseThrow(
+                () -> new TaskNotFoundException(idTask)
+        );
+        List<Changes> tempChanges = task.getChanges();
+        tempChanges.add(new Changes(task, "Completed"));
+        task.setChanges(tempChanges);
+        this.taskRepository.save(task);
+        return new ResponseEntity<>("Task was completed", HttpStatus.OK);
     }
 
     /**
@@ -156,6 +208,13 @@ public class MagicTaskController {
 
     private void validateTaskByUserAndName(String userId, Long id){
         this.taskRepository.findByUserUsernameAndId(userId, id);
+    }
+
+    private void validateByUpdate(String username, Long idTask, String nameTask, Date date){
+        Optional<Changes> changes = this.changesRepository.findByTaskUserUsernameAndTaskIdAndDateUpdate(username, idTask, date);
+        if (changes.isPresent() && (!changes.get().getTask().getUser().getId().equals(idTask))){
+            throw new TaskExistsException();
+        }
     }
 
     @Autowired

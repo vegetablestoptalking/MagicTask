@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface ChangesRepository extends JpaRepository<Changes, Long> {
     Optional<Changes>  findByTaskUserUsernameAndDateUpdateAndDescription(String username, Date dateUpdate, String description);
     Collection<Changes> findByTaskUserUsernameAndDateUpdateBetween(String username, Date dateFrom, Date dateTo);
-    Collection<Changes> findByTaskUserUsernameAndTaskIdAndDateUpdate(String username, Long id, Date dateUpdate);
+    Optional<Changes> findByTaskUserUsernameAndTaskIdAndDateUpdate(String username, Long id, Date dateUpdate);
+    Collection<Changes> findByTaskUserUsernameAndDescription(String username, String description);
+    Collection<Changes> findByTaskUserUsername(String username);
 
 }

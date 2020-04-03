@@ -3,8 +3,7 @@ package com.vgtstptlk.magictask.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 public class Task {
@@ -21,7 +20,7 @@ public class Task {
     private String description;
 
     @OneToMany(cascade = {CascadeType.ALL})
-    public Set<Changes> changes = new HashSet<>();
+    public List<Changes> changes = new ArrayList<>();
 
     public String getNameTask() {
         return nameTask;
@@ -65,11 +64,13 @@ public class Task {
         this.user = user;
     }
 
-    public Set<Changes> getChanges() {
+    public List<Changes> getChanges() {
         return changes;
     }
 
-    public void setChanges(Set<Changes> changes) {
+    public void setChanges(List<Changes> changes) {
         this.changes = changes;
     }
+
+
 }
