@@ -3,6 +3,7 @@ package com.vgtstptlk.magictask.controller;
 
 import com.vgtstptlk.magictask.domain.Changes;
 import com.vgtstptlk.magictask.domain.Task;
+import com.vgtstptlk.magictask.exceptions.TaskCantBeUpdatedException;
 import com.vgtstptlk.magictask.exceptions.TaskExistsException;
 import com.vgtstptlk.magictask.exceptions.TaskNotFoundException;
 import com.vgtstptlk.magictask.exceptions.UserNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.*;
 
@@ -34,24 +36,25 @@ public class MagicTaskController {
 
 
     /**
-     * Method adds a new task
-     * @param principal security attribute
-     * @param input Task
-     * @return ResponseEntity
+     *
+     * @param principal
+     * @param nameTask
+     * @param description
+     * @return response entity
      */
     @PostMapping
-    ResponseEntity<?> add(Principal principal, @ModelAttribute Task input){
+    ResponseEntity<?> add(Principal principal, @RequestParam("name_task") String nameTask, @RequestParam String description){
         this.validateUser(principal.getName());
-        this.validateTaskByDate(principal.getName(), input.getNameTask());
+        this.validateTaskByDate(principal.getName(), nameTask);
         return this.userRepository
                 .findByUsername(principal.getName())
                 .map(user -> {
-                    Task result = taskRepository.save(new Task(user, input.getNameTask(), input.getDescription()));
+                    Task result = taskRepository.save(new Task(user, nameTask, description));
                     HttpHeaders httpHeaders = new HttpHeaders();
                     httpHeaders.setLocation(ServletUriComponentsBuilder
                             .fromCurrentRequest().path("/{id}")
                             .buildAndExpand(result.getId()).toUri());
-                    return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+                    return new ResponseEntity<>("Task added", httpHeaders, HttpStatus.CREATED);
                 }).get();
     }
 
@@ -109,11 +112,11 @@ public class MagicTaskController {
 
     /**
      * Searching task by name and date (default: today's date)
-     * @param idTask task id
+     * @param idTask id
      * @return Task
      */
     @GetMapping(value = "{idTask}")
-    Task readTaskByName(Principal principal, @PathVariable Long idTask){
+    Task readTaskById(Principal principal, @PathVariable Long idTask){
 
         Optional<Changes> changes =  changesRepository
                 .findByTaskUserUsernameAndTaskIdAndDateUpdate(principal.getName(), idTask, new Date());
@@ -124,11 +127,20 @@ public class MagicTaskController {
         return changes.get().getTask();
     }
 
+    /**
+     *
+     * @param principal security
+     * @param dateFrom date from period
+     * @param dateTo date to period
+     * @return list
+     */
     @GetMapping("filter/byperiod")
-    List<Task> readTasksByPeriod(Principal principal, @RequestBody Date dateFrom, @RequestBody Date dateTo){
+    List<Task> readTasksByPeriod(Principal principal,
+                                 @NotNull @RequestParam("date_from") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateFrom,
+                                 @NotNull @RequestParam("date_to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateTo){
         this.validateUser(principal.getName());
         Iterator<Changes> changes = this.changesRepository
-                .findByTaskUserUsernameAndDateUpdateBetween(principal.getName(), dateFrom, dateFrom).iterator();
+                .findByTaskUserUsernameAndDateUpdateBetween(principal.getName(), dateFrom, dateTo).iterator();
         List<Task> tasks = new ArrayList<>();
         while (changes.hasNext()){
             tasks.add(changes.next().getTask());
@@ -136,15 +148,24 @@ public class MagicTaskController {
         return tasks;
     }
 
+    /**
+     *
+     * @param principal security
+     * @param idTask id
+     * @param nameTask name_task
+     * @param description description
+     * @param date date
+     * @return response entity
+     */
     @PutMapping(value = "{idTask}")
-    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam String nameTask,
+    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam("name_task") String nameTask,
                                  @RequestParam String description,
                                  @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
         this.validateTaskByUserAndName(principal.getName(), idTask);
-        this.validateByUpdate(principal.getName(), idTask, nameTask, date);
         if (date == null){
             date = new Date();
         }
+        this.validateByUpdate(principal.getName(), idTask, nameTask, date);
         Optional<Changes> changes = this.changesRepository
                 .findByTaskUserUsernameAndTaskIdAndDateUpdate(principal.getName(), idTask, date);
         changes.orElseThrow(
@@ -153,6 +174,9 @@ public class MagicTaskController {
 
         Changes tempChanges = changes.get();
         Task task = tempChanges.getTask();
+        if (task.getChanges().get(task.getChanges().size()-1).getDescription().equals("Completed")){
+            throw new TaskCantBeUpdatedException(idTask);
+        }
         task.setNameTask(nameTask);
         task.setDescription(description);
         List<Changes> listChanges = tempChanges.getTask().getChanges();
@@ -197,7 +221,8 @@ public class MagicTaskController {
     private void validateTaskByDate(String userId, String nameTask){
         Optional<Task> taskNewOptional = this.taskRepository.findByUserUsernameAndNameTask(userId, nameTask);
         if (taskNewOptional.isPresent()){
-            if (changesRepository.findByTaskUserUsernameAndDateUpdateAndDescription(userId, new Date(), "Created")
+            if (changesRepository.findByTaskUserUsernameAndTaskIdAndDateUpdateAndDescription(userId,
+                    taskNewOptional.get().getId(), new Date(), "Created")
                     .isPresent()){
                 throw new TaskExistsException();
             }
@@ -207,7 +232,9 @@ public class MagicTaskController {
     }
 
     private void validateTaskByUserAndName(String userId, Long id){
-        this.taskRepository.findByUserUsernameAndId(userId, id);
+        this.taskRepository.findByUserUsernameAndId(userId, id).orElseThrow(
+                () -> new TaskNotFoundException(id)
+        );
     }
 
     private void validateByUpdate(String username, Long idTask, String nameTask, Date date){

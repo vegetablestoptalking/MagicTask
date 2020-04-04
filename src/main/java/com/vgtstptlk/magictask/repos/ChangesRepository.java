@@ -13,5 +13,5 @@ public interface ChangesRepository extends JpaRepository<Changes, Long> {
     Optional<Changes> findByTaskUserUsernameAndTaskIdAndDateUpdate(String username, Long id, Date dateUpdate);
     Collection<Changes> findByTaskUserUsernameAndDescription(String username, String description);
     Collection<Changes> findByTaskUserUsername(String username);
-
+    Optional<Changes> findByTaskUserUsernameAndTaskIdAndDateUpdateAndDescription(String userId, Long id, Date date, String created);
 }

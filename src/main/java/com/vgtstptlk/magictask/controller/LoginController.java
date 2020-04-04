@@ -6,10 +6,7 @@ import com.vgtstptlk.magictask.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/login")
@@ -17,12 +14,13 @@ public class LoginController {
     UserRepository userRepository;
 
     @PostMapping("reg")
-    ResponseEntity<?> registration(@ModelAttribute User input){
-        if (userRepository.findByUsername(input.username).isPresent()){
-            throw new UserWithThisUsernameExistsException(input.username);
+    ResponseEntity<?> registration(@RequestParam("user_name") String username,@RequestParam String password,
+                                   @RequestParam("first_name") String firstName, @RequestParam("second_name") String secondName){
+        if (userRepository.findByUsername(username).isPresent()){
+            throw new UserWithThisUsernameExistsException(username);
         }
-        userRepository.save(new User(input.username, input.password, input.firstName, input.secondName));
-        return new ResponseEntity<>(HttpStatus.OK);
+        userRepository.save(new User(username, password, firstName, secondName));
+        return new ResponseEntity<>("User has successfully registered", HttpStatus.OK);
     }
 
 

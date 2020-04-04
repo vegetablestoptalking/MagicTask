@@ -18,7 +18,7 @@ import java.util.Arrays;
 @Configuration
 public class MagicTaskApplication {
 
-    @Bean
+    /*@Bean
     CommandLineRunner init(UserRepository userRepository,
                            TaskRepository taskRepository, ChangesRepository changesRepository) {
         User user = userRepository.save(new User("mag",
@@ -32,7 +32,7 @@ public class MagicTaskApplication {
                                     "Look" + a, "A description"));
 
                         });
-    }
+    }*/
     public static void main(String[] args) {
         SpringApplication.run(MagicTaskApplication.class, args);
     }
