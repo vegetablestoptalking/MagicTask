@@ -43,7 +43,7 @@ public class MagicTaskController {
      * @return response entity
      */
     @PostMapping
-    ResponseEntity<?> add(Principal principal, @RequestParam("name_task") String nameTask, @RequestParam String description){
+    ResponseEntity<?> add(Principal principal, @RequestParam String nameTask, @RequestParam String description){
         this.validateUser(principal.getName());
         this.validateTaskByDate(principal.getName(), nameTask);
         return this.userRepository
@@ -136,8 +136,8 @@ public class MagicTaskController {
      */
     @GetMapping("filter/byperiod")
     List<Task> readTasksByPeriod(Principal principal,
-                                 @NotNull @RequestParam("date_from") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateFrom,
-                                 @NotNull @RequestParam("date_to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateTo){
+                                 @NotNull @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateFrom,
+                                 @NotNull @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateTo){
         this.validateUser(principal.getName());
         Iterator<Changes> changes = this.changesRepository
                 .findByTaskUserUsernameAndDateUpdateBetween(principal.getName(), dateFrom, dateTo).iterator();
@@ -158,9 +158,9 @@ public class MagicTaskController {
      * @return response entity
      */
     @PutMapping(value = "{idTask}")
-    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam("name_task") String nameTask,
+    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam String nameTask,
                                  @RequestParam String description,
-                                 @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
+                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
         this.validateTaskByUserAndName(principal.getName(), idTask);
         if (date == null){
             date = new Date();

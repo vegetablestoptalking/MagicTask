@@ -1,3 +1,5 @@
+
+
 # MagicTask
 
 [TOC]
@@ -10,6 +12,9 @@
 
 1. *MySQL*
 2. *Java 8+*
+3. Intellij IDEA
+
+
 
 ### Инструкция по запуска 
 
@@ -17,7 +22,9 @@
 
 ### API
 
-#### /api/tasks/add
+Все запросы(/api/task/**) должны быть отправлены с basic auth. 
+
+#### [POST] /api/tasks/
 
 Метод добавляет задачу в список задач авторизованного пользователя.
 
@@ -25,70 +32,166 @@
 Method: POST
 ```
 
-**Request Example**
+##### Параметры запроса
 
-```json
-{
-    
-}
-```
+| Имя параметра |   Комментарий   | Тип параметра |  Тип   |
+| :-----------: | :-------------: | :-----------: | :----: |
+|   nameTask    |   Имя задачи    |   form-data   | String |
+|  description  | Доп. информация |   form-data   | String |
 
 ------
 
 
 
-#### /api/tasks/
+#### [GET] /api/tasks/
+
+Метод возвращает все задачи пользователя
 
 ```
 Method: GET
 ```
 
-**Request Example**
+##### Пример запроса
 
 ```http
 localhost:8080/api/tasks/
 ```
 
-**Response Example**
+##### Пример ответа
 
 ```json
 [
     {
-        "id": 4,
-        "nameTask": "Lookdsyer",
-        "flag": false,
-        "dateCreation": "2020-03-28",
-        "dateCompletion": null,
-        "description": "A description"
+        "id": 2,
+        "nameTask": "hellosome",
+        "description": "wow",
+        "changes": [
+            {
+                "id": 3,
+                "dateUpdate": "2020-04-04",
+                "description": "Created"
+            }
+        ]
     },
     {
-        "id": 5,
-        "nameTask": "Saydsyer",
-        "flag": false,
-        "dateCreation": "2020-03-28",
-        "dateCompletion": null,
-        "description": "A description"
+        "id": 4,
+        "nameTask": "newTask",
+        "description": "Test",
+        "changes": [
+            {
+                "id": 5,
+                "dateUpdate": "2020-04-04",
+                "description": "Created"
+            }
+        ]
+    }
+]
+```
+
+##### Выходные параметры
+
+|     Имя параметра     |     Тип     |        Комментарий         |
+| :-------------------: | :---------: | :------------------------: |
+|          id           |    Long     |    Уникальный id задачи    |
+|       nameTask        |   String    |         Имя задачи         |
+|      description      |   String    |      Описание задачи       |
+|     (changes) id      |    Long     |        id изменения        |
+| (changes) dateUpdate  | dateUpdate  |   Дата изменения статуса   |
+| (changes) description | description | Описание изменения статуса |
+
+Changes.description имеет 3 возможных статуса: "Created", "Updated", "Completed"
+
+Created – задача создана
+
+Updated – задача обновлена
+
+Completed – задача закрыта
+
+------
+
+#### [GET] /api/tasks/{id}
+
+Метод возвращает задачу по id
+
+```
+Method: GET
+```
+
+##### Пример ответа
+
+```json
+{
+    "id": 2,
+    "nameTask": "hellosome",
+    "description": "wow",
+    "changes": [
+        {
+            "id": 3,
+            "dateUpdate": "2020-04-04",
+            "description": "Created"
+        }
+    ]
+}
+```
+
+[Посмотреть таблицу с расшифровкой параметров](#####выходные-параметры) 
+
+------
+
+#### /api/tasks/filter/uncompleted
+
+```
+Method: GET
+```
+
+##### Пример ответа
+
+```json
+[
+    {
+        "id": 2,
+        "nameTask": "hellosome",
+        "description": "wow",
+        "changes": [
+            {
+                "id": 3,
+                "dateUpdate": "2020-04-04",
+                "description": "Created"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "nameTask": "newTask",
+        "description": "Test",
+        "changes": [
+            {
+                "id": 5,
+                "dateUpdate": "2020-04-04",
+                "description": "Created"
+            }
+        ]
     }
 ]
 ```
 
 ------
 
-
-
-#### /api/tasks/filter
+#### /api/tasks/filter/completed
 
 ```
-Method: POST
+Method: GET
 ```
 
-Request Example
+##### Пример ответа
 
-```json
-{
-    
-}
 ```
+
+```
+
+
+
+------
 
 
 

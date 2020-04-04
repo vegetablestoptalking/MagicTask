@@ -14,8 +14,8 @@ public class LoginController {
     UserRepository userRepository;
 
     @PostMapping("reg")
-    ResponseEntity<?> registration(@RequestParam("user_name") String username,@RequestParam String password,
-                                   @RequestParam("first_name") String firstName, @RequestParam("second_name") String secondName){
+    ResponseEntity<?> registration(@RequestParam("userName") String username,@RequestParam String password,
+                                   @RequestParam String firstName, @RequestParam String secondName){
         if (userRepository.findByUsername(username).isPresent()){
             throw new UserWithThisUsernameExistsException(username);
         }
