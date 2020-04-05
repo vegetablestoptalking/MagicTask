@@ -116,7 +116,7 @@ public class MagicTaskController {
     }
 
     /**
-     * Searching task by name and date (default: today's date)
+     * Searching task by id
      * @param idTask id
      * @return Task
      */
@@ -125,7 +125,7 @@ public class MagicTaskController {
     Task readTaskById(Principal principal, @PathVariable Long idTask){
 
         Optional<Changes> changes =  changesRepository
-                .findByTaskUserUsernameAndTaskIdAndDateUpdate(principal.getName(), idTask, new Date());
+                .findByTaskUserUsernameAndTaskId(principal.getName(), idTask);
         changes.orElseThrow(
                 () -> new TaskNotFoundException(idTask)
         );
