@@ -1,6 +1,7 @@
 package com.vgtstptlk.magictask.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
 public class Changes {
     @Id
     @GeneratedValue
+    @JsonView(Views.FullTask.class)
     private Long id;
 
     @ManyToOne
@@ -16,8 +18,10 @@ public class Changes {
     private Task task;
 
     @Temporal(TemporalType.DATE)
+    @JsonView(Views.FullTask.class)
     private Date dateUpdate;
 
+    @JsonView(Views.FullTask.class)
     private String description;
 
 
