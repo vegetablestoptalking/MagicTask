@@ -1,25 +1,31 @@
 package com.vgtstptlk.magictask.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
+import javax.swing.text.View;
 import java.util.*;
 
 @Entity
 public class Task {
     @Id
     @GeneratedValue
+    @JsonView(Views.ShortTask.class)
     private Long id;
 
     @JsonIgnore
     @ManyToOne
     private User user;
 
+    @JsonView(Views.ShortTask.class)
     private String nameTask;
 
+    @JsonView(Views.ShortTask.class)
     private String description;
 
     @OneToMany(cascade = {CascadeType.ALL})
+    @JsonView(Views.FullTask.class)
     public List<Changes> changes = new ArrayList<>();
 
     public String getNameTask() {

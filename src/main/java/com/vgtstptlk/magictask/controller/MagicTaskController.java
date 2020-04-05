@@ -1,8 +1,10 @@
 package com.vgtstptlk.magictask.controller;
 
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.vgtstptlk.magictask.domain.Changes;
 import com.vgtstptlk.magictask.domain.Task;
+import com.vgtstptlk.magictask.domain.Views;
 import com.vgtstptlk.magictask.exceptions.TaskCantBeUpdatedException;
 import com.vgtstptlk.magictask.exceptions.TaskExistsException;
 import com.vgtstptlk.magictask.exceptions.TaskNotFoundException;
@@ -43,7 +45,7 @@ public class MagicTaskController {
      * @return response entity
      */
     @PostMapping
-    ResponseEntity<?> add(Principal principal, @RequestParam String nameTask, @RequestParam String description){
+    synchronized ResponseEntity<?> add(Principal principal, @RequestParam String nameTask, @RequestParam String description){
         this.validateUser(principal.getName());
         this.validateTaskByDate(principal.getName(), nameTask);
         return this.userRepository
@@ -63,6 +65,7 @@ public class MagicTaskController {
      *
      * */
     @GetMapping
+    @JsonView(Views.ShortTask.class)
     Collection<Task> readTasks(Principal principal){
         this.validateUser(principal.getName());
         return this.taskRepository.findByUserUsername(principal.getName());
@@ -74,6 +77,7 @@ public class MagicTaskController {
      * @return collection with completed tasks
      */
     @GetMapping("filter/completed")
+    @JsonView(Views.ShortTask.class)
     Collection<Task> readCompletedTasks(Principal principal){
         this.validateUser(principal.getName());
         Collection<Task> tasks = this.taskRepository.findByUserUsername(principal.getName());
@@ -95,6 +99,7 @@ public class MagicTaskController {
      * @return collection with undone tasks
      */
     @GetMapping("filter/uncompleted")
+    @JsonView(Views.ShortTask.class)
     Collection<Task> readUncompletedTasks(Principal principal){
         this.validateUser(principal.getName());
         Collection<Task> tasks = this.taskRepository.findByUserUsername(principal.getName());
@@ -116,6 +121,7 @@ public class MagicTaskController {
      * @return Task
      */
     @GetMapping(value = "{idTask}")
+    @JsonView(Views.FullTask.class)
     Task readTaskById(Principal principal, @PathVariable Long idTask){
 
         Optional<Changes> changes =  changesRepository
@@ -158,7 +164,7 @@ public class MagicTaskController {
      * @return response entity
      */
     @PutMapping(value = "{idTask}")
-    ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam String nameTask,
+    synchronized ResponseEntity<?> updateTask(Principal principal, @PathVariable Long idTask, @RequestParam String nameTask,
                                  @RequestParam String description,
                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
         this.validateTaskByUserAndName(principal.getName(), idTask);
@@ -187,7 +193,7 @@ public class MagicTaskController {
     }
 
     @PutMapping("completed/{idTask}")
-    ResponseEntity<?> completeTask(Principal principal, @PathVariable Long idTask){
+    synchronized ResponseEntity<?> completeTask(Principal principal, @PathVariable Long idTask){
         this.validateUser(principal.getName());
         Task task = this.taskRepository.findByUserUsernameAndId(principal.getName(), idTask).orElseThrow(
                 () -> new TaskNotFoundException(idTask)
@@ -206,7 +212,7 @@ public class MagicTaskController {
      * @return response entity with OK status
      */
     @DeleteMapping(value = "{idTask}")
-    ResponseEntity<?> deleteTask(Principal principal, @PathVariable Long idTask){
+    synchronized ResponseEntity<?> deleteTask(Principal principal, @PathVariable Long idTask){
         this.validateUser(principal.getName());
         this.validateTaskByUserAndName(principal.getName(), idTask);
         taskRepository.deleteById(idTask);
