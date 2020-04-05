@@ -124,13 +124,15 @@ public class MagicTaskController {
     @JsonView(Views.FullTask.class)
     Task readTaskById(Principal principal, @PathVariable Long idTask){
 
-        Optional<Changes> changes =  changesRepository
+        Collection<Changes> changes =  changesRepository
                 .findByTaskUserUsernameAndTaskId(principal.getName(), idTask);
-        changes.orElseThrow(
-                () -> new TaskNotFoundException(idTask)
-        );
 
-        return changes.get().getTask();
+        Iterator<Changes> changesIterator = changes.iterator();
+        if (!changesIterator.hasNext()){
+            throw new TaskNotFoundException(idTask);
+        }
+
+        return changesIterator.next().getTask();
     }
 
     /**
