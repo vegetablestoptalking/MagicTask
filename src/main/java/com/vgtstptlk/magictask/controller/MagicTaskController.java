@@ -126,8 +126,8 @@ public class MagicTaskController {
 
         Optional<Task> task = this.taskRepository.findByUserUsernameAndId(principal.getName(), idTask);
         task.orElseThrow(
-                () -> new TaskNotFoundException(idTask);
-        )
+                () -> new TaskNotFoundException(idTask)
+        );
 
         return task.get();
     }
